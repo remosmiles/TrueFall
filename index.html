@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Diagnostic v4.2</title>
+    <style>
+        :root {
+            --neon-red: #ff003c;
+            --neon-green: #00ff41;
+            --bg-dark: #0a0a0a;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .screen {
+            display: none;
+            height: 100vh;
+            width: 100vw;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            transition: transform 1s ease-in-out;
+        }
+
+        .active { display: flex; }
+
+        /* Animation für den Seitenwechsel */
+        .rotate-out { transform: rotate(360deg) scale(0); }
+
+        /* Input Styling */
+        input {
+            background: transparent;
+            border: 2px solid var(--neon-green);
+            color: var(--neon-green);
+            padding: 15px;
+            font-size: 1.2rem;
+            outline: none;
+            margin-top: 20px;
+            box-shadow: 0 0 10px var(--neon-green);
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 30px;
+            background: var(--neon-green);
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        /* Terminal Effekt */
+        #terminal {
+            text-align: left;
+            width: 80%;
+            max-width: 600px;
+            color: var(--neon-green);
+        }
+
+        /* Error Box */
+        .error-overlay {
+            border: 5px solid var(--neon-red);
+            padding: 40px;
+            background: rgba(255, 0, 60, 0.1);
+            box-shadow: 0 0 50px var(--neon-red);
+            animation: blink 0.2s infinite;
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; }
+        }
+
+        .error-btn {
+            background: var(--neon-red);
+            color: white;
+            box-shadow: 0 0 20px var(--neon-red);
+        }
+
+        /* Finales Bild */
+        img {
+            max-width: 90%;
+            border: 5px solid white;
+            border-radius: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="page1" class="screen active">
+        <h1>SECURITY CHECK REQUIRED</h1>
+        <p>Bitte geben Sie Ihren Namen ein, um fortzufahren:</p>
+        <input type="text" id="userName" placeholder="Name eingeben...">
+        <button onclick="startAnalysis()">ANALYSYIEREN</button>
+    </div>
+
+    <div id="page2" class="screen">
+        <div id="terminal"></div>
+    </div>
+
+    <div id="page3" class="screen">
+        <div class="error-overlay">
+            <h1 style="color: var(--neon-red); font-size: 3rem;">SYSTEM ERROR</h1>
+            <p>DATENSATZ BESCHÄDIGT ODER UNZULÄSSIG</p>
+            <button class="error-btn" onclick="showResult()">AUSWERTUNG ANSCHAUEN</button>
+        </div>
+    </div>
+
+    <div id="page4" class="screen">
+        <h1>PROFIL GEFUNDEN:</h1>
+        <img src="https://t3.ftcdn.net/jpg/00/60/01/01/360_F_60010141_936T0p26yY95kX67mI27i7D8H9zQhZqA.jpg" alt="Lustiges Schwein">
+        <h2 id="finalName"></h2>
+        <p>Leg dich nicht mit dem System an!</p>
+    </div>
+
+    <script>
+        function nextStep(current, next, rotate = false) {
+            const currPage = document.getElementById('page' + current);
+            const nextPage = document.getElementById('page' + next);
+            
+            if(rotate) currPage.classList.add('rotate-out');
+            
+            setTimeout(() => {
+                currPage.classList.remove('active');
+                nextPage.classList.add('active');
+            }, rotate ? 1000 : 0);
+        }
+
+        function startAnalysis() {
+            const name = document.getElementById('userName').value;
+            if(!name) return alert("Namen eingeben!");
+            
+            document.getElementById('finalName').innerText = name;
+            nextStep(1, 2, true);
+
+            const logs = [
+                "Verbindung zu Server 127.0.0.1 hergestellt...",
+                `Analysiere Identität: ${name}...`,
+                "Suche nach Browserverlauf...",
+                "Extrahiere Standortdaten...",
+                "Downloade private Dateien (C:/Users/Documents)...",
+                "99% abgeschlossen...",
+                "CRITICAL FAILURE!"
+            ];
+
+            let i = 0;
+            const term = document.getElementById('terminal');
+            const interval = setInterval(() => {
+                if(i < logs.length) {
+                    term.innerHTML += `<p>> ${logs[i]}</p>`;
+                    i++;
+                } else {
+                    clearInterval(interval);
+                    setTimeout(() => nextStep(2, 3), 1000);
+                }
+            }, 1000);
+        }
+
+        function showResult() {
+            nextStep(3, 4);
+        }
+    </script>
+</body>
+</html>
