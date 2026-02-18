@@ -28,15 +28,15 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            transition: transform 1s ease-in-out;
+            transition: all 1s ease-in-out;
         }
 
         .active { display: flex; }
 
-        /* Animation für den Seitenwechsel */
-        .rotate-out { transform: rotate(360deg) scale(0); }
+        /* Animation für den Seitenwechsel (Rotation) */
+        .rotate-out { transform: rotate(360deg) scale(0); opacity: 0; }
 
-        /* Input Styling */
+        /* Input & Button Styling */
         input {
             background: transparent;
             border: 2px solid var(--neon-green);
@@ -50,23 +50,22 @@
 
         button {
             margin-top: 20px;
-            padding: 10px 30px;
+            padding: 15px 30px;
             background: var(--neon-green);
             border: none;
             cursor: pointer;
             font-weight: bold;
             text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: 0.3s;
         }
 
-        /* Terminal Effekt */
-        #terminal {
-            text-align: left;
-            width: 80%;
-            max-width: 600px;
-            color: var(--neon-green);
-        }
+        button:hover { transform: scale(1.1); box-shadow: 0 0 20px var(--neon-green); }
 
-        /* Error Box */
+        /* Terminal CSS */
+        #terminal { text-align: left; width: 80%; max-width: 600px; color: var(--neon-green); line-height: 1.5; }
+
+        /* Error CSS */
         .error-overlay {
             border: 5px solid var(--neon-red);
             padding: 40px;
@@ -79,26 +78,26 @@
             0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; }
         }
 
-        .error-btn {
-            background: var(--neon-red);
-            color: white;
-            box-shadow: 0 0 20px var(--neon-red);
+        .error-btn { background: var(--neon-red); color: white; box-shadow: 0 0 20px var(--neon-red); }
+        .error-btn:hover { box-shadow: 0 0 40px var(--neon-red); }
+
+        /* Das Schwein-Bild */
+        .pig-img {
+            max-width: 80%;
+            border: 8px solid white;
+            box-shadow: 0 0 30px rgba(255,255,255,0.5);
+            border-radius: 20px;
         }
 
-        /* Finales Bild */
-        img {
-            max-width: 90%;
-            border: 5px solid white;
-            border-radius: 15px;
-        }
+        .final-msg { margin-top: 20px; font-size: 2rem; color: var(--neon-green); }
     </style>
 </head>
 <body>
 
     <div id="page1" class="screen active">
-        <h1>SECURITY CHECK REQUIRED</h1>
-        <p>Bitte geben Sie Ihren Namen ein, um fortzufahren:</p>
-        <input type="text" id="userName" placeholder="Name eingeben...">
+        <h1 style="color: var(--neon-green)">SECURITY CHECK REQUIRED</h1>
+        <p>Bitte geben Sie Ihren Namen ein, um die Identität zu bestätigen:</p>
+        <input type="text" id="userName" placeholder="Vollständiger Name...">
         <button onclick="startAnalysis()">ANALYSYIEREN</button>
     </div>
 
@@ -110,62 +109,82 @@
         <div class="error-overlay">
             <h1 style="color: var(--neon-red); font-size: 3rem;">SYSTEM ERROR</h1>
             <p>DATENSATZ BESCHÄDIGT ODER UNZULÄSSIG</p>
-            <button class="error-btn" onclick="showResult()">AUSWERTUNG ANSCHAUEN</button>
+            <button class="error-btn" onclick="goToStep4()">AUSWERTUNG ANSCHAUEN</button>
         </div>
     </div>
 
     <div id="page4" class="screen">
-        <h1>PROFIL GEFUNDEN:</h1>
-        <img src="https://t3.ftcdn.net/jpg/00/60/01/01/360_F_60010141_936T0p26yY95kX67mI27i7D8H9zQhZqA.jpg" alt="Lustiges Schwein">
-        <h2 id="finalName"></h2>
-        <p>Leg dich nicht mit dem System an!</p>
+        <h2 style="color: yellow;">WARNUNG: Media-Files gefunden</h2>
+        <p>Wir haben in den tiefen des Netzes etwas über dich gefunden...</p>
+        <button onclick="showFinalPig()" style="background: white; color: black; border: 2px solid black;">
+            Ein Bild von DIR wurde gefunden! (Ansehen)
+        </button>
+    </div>
+
+    <div id="page5" class="screen">
+        <h1 id="finalName" class="final-msg"></h1>
+        <img src="https://t3.ftcdn.net/jpg/00/60/01/01/360_F_60010141_936T0p26yY95kX67mI27i7D8H9zQhZqA.jpg" class="pig-img" alt="Schwein">
+        <p style="margin-top: 15px;">Leg dich besser nicht mit dem System an!</p>
     </div>
 
     <script>
-        function nextStep(current, next, rotate = false) {
-            const currPage = document.getElementById('page' + current);
-            const nextPage = document.getElementById('page' + next);
+        // Hilfsfunktion zum Seitenwechsel
+        function showPage(currentId, nextId, rotate = false) {
+            const current = document.getElementById(currentId);
+            const next = document.getElementById(nextId);
             
-            if(rotate) currPage.classList.add('rotate-out');
-            
-            setTimeout(() => {
-                currPage.classList.remove('active');
-                nextPage.classList.add('active');
-            }, rotate ? 1000 : 0);
+            if (rotate) {
+                current.classList.add('rotate-out');
+                setTimeout(() => {
+                    current.classList.remove('active');
+                    next.classList.add('active');
+                }, 1000);
+            } else {
+                current.classList.remove('active');
+                next.classList.add('active');
+            }
         }
 
+        // Schritt 1 -> 2
         function startAnalysis() {
             const name = document.getElementById('userName').value;
-            if(!name) return alert("Namen eingeben!");
+            if(!name) return alert("Bitte Namen eingeben!");
             
-            document.getElementById('finalName').innerText = name;
-            nextStep(1, 2, true);
+            document.getElementById('finalName').innerText = "IDENTITÄT BESTÄTIGT: " + name;
+            showPage('page1', 'page2', true);
 
             const logs = [
-                "Verbindung zu Server 127.0.0.1 hergestellt...",
-                `Analysiere Identität: ${name}...`,
-                "Suche nach Browserverlauf...",
-                "Extrahiere Standortdaten...",
-                "Downloade private Dateien (C:/Users/Documents)...",
-                "99% abgeschlossen...",
-                "CRITICAL FAILURE!"
+                "> Verbinde zu Global-Database...",
+                "> Zugriff auf IP-Logbuch gewährt.",
+                `> Suche nach Biometrischen Daten für: ${name}`,
+                "> Browser-Cache wird ausgelesen...",
+                "> Webcam-Verlauf wird rekonstruiert...",
+                "> Download der privaten Mediendateien (100MB/s)...",
+                "> 99% fertig...",
+                "> KRITISCHER SYSTEMFEHLER!"
             ];
 
             let i = 0;
             const term = document.getElementById('terminal');
             const interval = setInterval(() => {
                 if(i < logs.length) {
-                    term.innerHTML += `<p>> ${logs[i]}</p>`;
+                    term.innerHTML += `<p>${logs[i]}</p>`;
                     i++;
                 } else {
                     clearInterval(interval);
-                    setTimeout(() => nextStep(2, 3), 1000);
+                    setTimeout(() => showPage('page2', 'page3'), 1500);
                 }
             }, 1000);
         }
 
-        function showResult() {
-            nextStep(3, 4);
+        // Schritt 3 -> 4
+        function goToStep4() {
+            showPage('page3', 'page4');
+        }
+
+        // Schritt 4 -> 5
+        function showFinalPig() {
+            showPage('page4', 'page5');
         }
     </script>
 </body>
